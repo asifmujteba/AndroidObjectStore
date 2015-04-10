@@ -1,11 +1,12 @@
 package com.asf.asfobjectstore;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 /**
  * Created by asifmujteba on 16/11/2014.
  */
-public class ASFObjectStore {
+public class ASFObjectStore<T> {
 
     /**
      * Get default Singleton instance
@@ -16,7 +17,7 @@ public class ASFObjectStore {
         if (defaultInstance == null) {
             synchronized (ASFObjectStore.class) {
                 if (defaultInstance == null) {
-                    defaultInstance = new ASFObjectStore();
+                    defaultInstance = new ASFObjectStore<>();
                 }
             }
         }
@@ -33,21 +34,42 @@ public class ASFObjectStore {
     }
 
     /**
-     * Push/Store an Object to the Store and return its unique key back for reference
+     * Default Constructor
+     */
+    public ASFObjectStore() { }
+
+    /**
+     * Push/Store an Object to the Store and keep a strong reference of the Object until it is
+     * popped, to avoid un-wanted Garbage Collection
      *
      * @param obj An Object to Push
      * @return Unique key to access the Object
      */
-    public synchronized String push(Object obj) {
-        while (map.containsKey(key)) {
-            long ln = Long.parseLong(key);
-            if (ln == Long.MAX_VALUE-1) key = "0";
-            key = ((int)(ln+1)) + "";
+    public synchronized String pushStrong(T obj) {
+        while (strongMap.containsKey(S+key)) {
+            incrementKey();
         }
 
-        map.put(key, obj);
+        strongMap.put(S+key, obj);
 
-        return key;
+        return S+key;
+    }
+
+    /**
+     * Push/Store an Object to the Store and keep a weak reference of the Object so that it can be
+     * garbage collected even if it has not been popped yet!
+     *
+     * @param obj An Object to Push
+     * @return Unique key to access the Object
+     */
+    public synchronized String pushWeak(T obj) {
+        while (weakMap.containsKey(W+key)) {
+            incrementKey();
+        }
+
+        weakMap.put(W+key, new WeakReference<>(obj));
+
+        return W+key;
     }
 
     /**
@@ -57,13 +79,17 @@ public class ASFObjectStore {
      * @return Popped Object
      */
     public synchronized Object pop(String aKey) {
-        if (aKey == null) {
-            return null;
-        }
+        if (aKey == null) { return null; }
 
-        Object obj = get(aKey);
-        if (obj != null) {
-            map.remove(aKey);
+        T obj = null;
+
+        if (strongMap.containsKey(aKey)) {
+            obj = strongMap.get(aKey);
+            strongMap.remove(aKey);
+        }
+        else if (weakMap.containsKey(aKey)) {
+            obj = weakMap.get(aKey).get();
+            weakMap.remove(aKey);
         }
 
         return obj;
@@ -71,16 +97,19 @@ public class ASFObjectStore {
 
     /**
      * Get an Object from the Store without removing it
-     * @see {@link #pop(String)} Use this method instead if you
-     * want remove the object from the Store after retreiving
+     * Use {@link #pop(String)} instead if you want remove the object from the Store after
+     * retrieving.
      *
      * @param aKey Unique key of the Object
      * @return Object
      */
     public synchronized Object get(String aKey) {
-        if (map.containsKey(aKey)) {
-            Object obj = map.get(aKey);
-            return obj;
+        if (strongMap.containsKey(aKey)) {
+            return strongMap.get(aKey);
+        }
+
+        if (weakMap.containsKey(aKey)) {
+            return weakMap.get(aKey).get();
         }
 
         return null;
@@ -88,10 +117,21 @@ public class ASFObjectStore {
 
 
     // ---------- private Stuff -------------//
-    private static volatile ASFObjectStore defaultInstance;
+    private static final String S = "S";
+    private static final String W = "W";
+
+    private static volatile ASFObjectStore<Object> defaultInstance;
 
     private String key = "0";
-    private HashMap<String, Object> map = new HashMap<String, Object>();
+    private HashMap<String, T> strongMap = new HashMap<>();
+    private HashMap<String, WeakReference<T>> weakMap = new HashMap<>();
 
-    private ASFObjectStore() { }
+    /**
+     * Increment the key variable
+     */
+    private void incrementKey() {
+        long ln = Long.parseLong(key);
+        if (ln == Long.MAX_VALUE-1) key = "0";
+        key = ((int)(ln+1)) + "";
+    }
 }
