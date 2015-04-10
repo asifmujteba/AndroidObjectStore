@@ -1,4 +1,4 @@
-# ASFObjectStore
+# AndroidObjectStore
 A Simple Object Store to push/pop objects accessible by unique keys, Extremely Helpful for passing Custom Objects between Activities and other components.
 
 <h2>USAGE</h2>
@@ -9,12 +9,12 @@ Suppose we have a custom object named 'myObject' which we want to pass from 'ABC
 **In ABCActivity**
 ```
 String myObjectKey = ASFObjectStore.getDefault().push(myObject);
-intent.putExtra(XYZActivity.MY_OBJECT_KEY, myObjectKey);
+intent.putExtra(XYZActivity.EXTRA_MY_OBJECT_KEY, myObjectKey);
 ```
 
 **In XYZActivity**
 ```
-String myObjectKey = getIntent().getStringExtra(MY_OBJECT_KEY);
+String myObjectKey = getIntent().getStringExtra(EXTRA_MY_OBJECT_KEY);
 myObject = ASFObjectStore.getDefault().pop(myObjectKey);
 ```
 
