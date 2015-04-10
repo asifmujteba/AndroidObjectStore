@@ -16,7 +16,7 @@ String myObjectKey = getIntent().getStringExtra(MY_OBJECT_KEY);
 myObject = ASFObjectStore.shared().pop(myObjectKey);
 ```
 
-<h2>Add EventBus to your project</h2>
+<h2>Add ASFObjectStore to your project</h2>
 TODO
 
 <h2>Author</h2>
