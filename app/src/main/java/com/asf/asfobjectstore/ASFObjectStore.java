@@ -8,16 +8,28 @@ import java.util.HashMap;
 public class ASFObjectStore {
 
     /**
-     * Get Singleton instance
+     * Get default Singleton instance
      *
      * @return a singleton ASFObjectStore instance
      */
-    public static ASFObjectStore shared() {
-        if(instance == null) {
-            instance = new ASFObjectStore();
+    public static ASFObjectStore getDefault() {
+        if (defaultInstance == null) {
+            synchronized (ASFObjectStore.class) {
+                if (defaultInstance == null) {
+                    defaultInstance = new ASFObjectStore();
+                }
+            }
         }
+        return defaultInstance;
+    }
 
-        return instance;
+    /**
+     * Dispose the default singleton Object
+     */
+    public static void dispose() {
+        synchronized (ASFObjectStore.class) {
+            defaultInstance = null;
+        }
     }
 
     /**
@@ -76,7 +88,7 @@ public class ASFObjectStore {
 
 
     // ---------- private Stuff -------------//
-    private static ASFObjectStore instance;
+    private static volatile ASFObjectStore defaultInstance;
 
     private String key = "0";
     private HashMap<String, Object> map = new HashMap<String, Object>();
