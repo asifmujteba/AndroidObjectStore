@@ -1,8 +1,10 @@
 # AndroidObjectStore aka ASFObjectStore
-A Simple Object Store to push/pop objects accessible by unique keys, Extremely Helpful for passing Custom Objects in between Activities and other components.
+A Simple Object Store to push/pop objects accessible by unique keys, Extremely Helpful for passing Custom Objects in between Activities/Services and other components.
+
+Inspired from [Android Docs](http://developer.android.com/guide/faq/framework.html#3).
 
 <h2>Why AndroidObjectStore</h2>
-In addition to acting as a general Object Store this library is great for passing custom objects in between activities, Fragments and other components. Here's Why:
+In addition to acting as a general Object Store this library is great for passing custom objects in between activities, services, Fragments and other components. Here's Why:
 
 Currently for passing custom objects in between activities either we have to implement Parcellable or Serialization which not only justs adds un-necessary work to add extra code and moreover adds both performance and memory hit, which is defintely not a good way to go!
 
